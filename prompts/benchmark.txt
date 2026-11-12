@@ -1,0 +1,8 @@
+# One idea per line. Used by:  python harness.py --batch prompts/benchmark.txt
+# Chosen to cover different genres, inputs and mechanics (plain English, no technical wording).
+a ghost dodging falling pumpkins, you lose after three hits
+a cat flying a rocket and shooting asteroids
+a knight running through a castle, jumping over fire pits and collecting coins
+a little robot collecting batteries in a maze while avoiding patrol drones
+a hungry caterpillar eating leaves in a garden and growing longer
+an underwater game where you click bubbles to pop them before they reach the surface

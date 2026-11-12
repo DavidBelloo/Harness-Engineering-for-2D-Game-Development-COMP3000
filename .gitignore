@@ -1,0 +1,14 @@
+# generated games and caches
+output/
+.cache/
+__pycache__/
+*.pyc
+.venv/
+venv/
+# models and tools are downloaded by the setup steps, never committed
+tools/
+*.safetensors
+*.gguf
+*.ckpt
+*.onnx
+*.bak

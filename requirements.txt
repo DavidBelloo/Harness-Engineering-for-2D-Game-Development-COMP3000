@@ -1,0 +1,16 @@
+# Python 3.10 - 3.12 (3.11 recommended). Use a virtual environment.
+#
+# INSTALL ORDER MATTERS on a Windows + NVIDIA machine (see README):
+#   1) pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cu121     (GPU build, only needed for MusicGen)
+#   2) pip install -r requirements.txt
+#   3) playwright install chromium        (optional: Microsoft Edge is used automatically if Chromium is missing)
+#
+# torch is intentionally not listed here: a plain `pip install torch` on Windows gives the CPU-only build.
+requests>=2.31
+numpy<2            # torch 2.3.1 wheels were built against NumPy 1.x
+pillow>=10
+playwright>=1.44
+rembg>=2.0.57
+onnxruntime>=1.17
+transformers==4.44.2
+mcp>=1.2,<2        # only for mcp_server.py (FastMCP API of the 1.x series)

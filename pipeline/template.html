@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+html,body{margin:0;height:100%;background:#0b0b10;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center}
+canvas{display:block;width:min(100vw,calc(100vh*4/3));height:auto;aspect-ratio:4/3;background:#000;image-rendering:pixelated;image-rendering:crisp-edges}
+</style>
+</head>
+<body>
+<canvas id="c" width="800" height="600"></canvas>
+<script>window.__ASSETS = {{ASSETS_JSON}};</script>
+<script>
+{{RUNTIME}}
+</script>
+<script>
+/* AI-written game code (wrapped so it cannot clash with runtime names) */
+try {
+window.__game = (function () {
+{{GAME_CODE}}
+return game;
+})();
+} catch (e) { console.error("Game code failed to load: " + e.message + "\n" + (e.stack || "")); }
+</script>
+<script>startGame(window.__game);</script>
+</body>
+</html>
