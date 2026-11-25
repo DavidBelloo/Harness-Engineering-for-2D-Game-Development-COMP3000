@@ -50,18 +50,20 @@ def search_game_docs(query: str, k: int = 3) -> str:
 
 @mcp.tool()
 async def generate_sprite(name: str, description: str, width: int = 64, height: int = 64, out_dir: str = "output/mcp") -> str:
-    """Generate one transparent pixel-art sprite with local Stable Diffusion (Forge must be running with --api).
+    """Generate one transparent pixel-art sprite with local Stable Diffusion.
     Describe ONE object in 3-8 words. Returns the PNG path; use the same `name` in Sprites.draw(ctx, name, ...)."""
     w, h = max(16, min(int(width), 128)), max(16, min(int(height), 128))
 
     def work():
-        if not sprites.forge_up():
-            raise RuntimeError(sprites.FORGE_HELP.format(url=config.FORGE_URL))
+        ok, detail = sprites.ready()
+        if not ok:
+            raise RuntimeError(detail)
         img, raw, meta = sprites.make_sprite(description, w, h)
         d = _out(out_dir)
         d.mkdir(parents=True, exist_ok=True)
         path = d / f"{snake(name)}.png"
         img.save(path)
+        sprites.unload()            # free VRAM for the next tool (the LLM or MusicGen)
         return json.dumps({"path": str(path), "width": w, "height": h, **meta})
     return await asyncio.to_thread(work)
 
@@ -70,12 +72,14 @@ async def generate_sprite(name: str, description: str, width: int = 64, height: 
 async def generate_background(description: str, out_path: str = "output/mcp/background.png") -> str:
     """Generate an 800x600 pixel-art background (scenery only, no characters)."""
     def work():
-        if not sprites.forge_up():
-            raise RuntimeError(sprites.FORGE_HELP.format(url=config.FORGE_URL))
+        ok, detail = sprites.ready()
+        if not ok:
+            raise RuntimeError(detail)
         img, raw, meta = sprites.make_background(description)
         p = _out(out_path)
         p.parent.mkdir(parents=True, exist_ok=True)
         img.save(p)
+        sprites.unload()
         return json.dumps({"path": str(p), **meta})
     return await asyncio.to_thread(work)
 

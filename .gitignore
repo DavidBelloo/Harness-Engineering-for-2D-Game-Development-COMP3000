@@ -12,3 +12,5 @@ tools/
 *.ckpt
 *.onnx
 *.bak
+.venv/
+setup.log

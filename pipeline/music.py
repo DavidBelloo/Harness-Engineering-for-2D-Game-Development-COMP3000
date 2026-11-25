@@ -62,7 +62,7 @@ def generate(prompt, out_wav, seconds=None):
         from transformers import AutoProcessor, MusicgenForConditionalGeneration
         if device == "cpu":
             say("  [music] no CUDA GPU visible to PyTorch - this will be slow (minutes)")
-        say(f"  [music] loading {config.MUSIC_MODEL} (first run downloads ~2.4 GB)")
+        say(f"  [music] loading {config.MUSIC_MODEL}")
         processor = AutoProcessor.from_pretrained(config.MUSIC_MODEL)
         model = MusicgenForConditionalGeneration.from_pretrained(config.MUSIC_MODEL).to(device)
         inputs = processor(text=[prompt], padding=True, return_tensors="pt").to(device)

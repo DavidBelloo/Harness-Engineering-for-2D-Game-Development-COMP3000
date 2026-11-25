@@ -1,16 +1,19 @@
-# Python 3.10 - 3.12 (3.11 recommended). Use a virtual environment.
+# The normal install is setup.bat (or `uv sync`), which reads pyproject.toml.
+# This file is only for a manual pip install. Use Python 3.11 or 3.12, in a virtual environment.
 #
-# INSTALL ORDER MATTERS on a Windows + NVIDIA machine (see README):
-#   1) pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cu121     (GPU build, only needed for MusicGen)
-#   2) pip install -r requirements.txt
-#   3) playwright install chromium        (optional: Microsoft Edge is used automatically if Chromium is missing)
-#
-# torch is intentionally not listed here: a plain `pip install torch` on Windows gives the CPU-only build.
+#   pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cu128     (GPU build; RTX 50-series needs cu128)
+#   pip install -r requirements.txt
+#   playwright install chromium
 requests>=2.31
-numpy<2            # torch 2.3.1 wheels were built against NumPy 1.x
+numpy>=1.26
 pillow>=10
 playwright>=1.44
 rembg>=2.0.57
 onnxruntime>=1.17
-transformers==4.44.2
-mcp>=1.2,<2        # only for mcp_server.py (FastMCP API of the 1.x series)
+diffusers==0.35.2
+transformers==4.56.2
+accelerate==1.10.1
+peft==0.17.1
+safetensors>=0.4.3
+huggingface-hub>=0.34,<1.0
+mcp>=1.2,<2

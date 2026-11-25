@@ -7,7 +7,7 @@
 Pipeline (each stage is a separate, swappable module in pipeline/):
     1 plan      local LLM (Ollama)          idea -> JSON design (sprites, sfx, music prompt, rules)
     2 code      RAG + local coding LLM      design + retrieved patterns + skill file -> game logic (JS)
-    3 art/music Stable Diffusion Forge + rembg + MusicGen   -> sprites, background, BGM loop
+    3 art/music Stable Diffusion (diffusers) + rembg + MusicGen -> sprites, background, BGM loop
     4 assemble  pipeline/assemble.py        code + assets + runtime -> ONE self-contained HTML file
     5 test/fix  headless browser + LLM      play it, report errors, let the LLM repair its own code
 """
@@ -33,7 +33,9 @@ def run_one(idea, args, retriever=None):
     timings, tokens = {}, {}
     rec = {"idea": idea, "run_dir": str(run_dir), "started": datetime.now().isoformat(timespec="seconds"),
            "models": {"code": config.CODE_MODEL, "plan": config.PLAN_MODEL, "embed": config.EMBED_MODEL,
-                      "image": config.FORGE_CHECKPOINT or "(Forge default checkpoint)",
+                      "image": (config.IMAGE_MODEL + (f" + {config.IMAGE_LORA}" if config.IMAGE_LORA else "")) if config.IMAGE_BACKEND != "forge"
+                               else (config.FORGE_CHECKPOINT or "(Forge default checkpoint)"),
+                      "profile": config.PROFILE,
                       "music": config.MUSIC_MODEL if config.MUSIC_BACKEND != "none" and not args.no_music else "none (runtime chiptune)"}}
     say(f"\n######## {idea}")
 
@@ -71,7 +73,7 @@ def run_one(idea, args, retriever=None):
     with timed(timings, "art"):
         if need_art:
             sprite_paths, bg_path, art_info = sprites.generate_assets(plan, assets_dir)
-            sprites.unload_forge()
+            sprites.unload()
         else:
             say("  [art] skipped (--skip-art): coloured placeholder sprites")
             assets_dir.mkdir(parents=True, exist_ok=True)
@@ -141,7 +143,7 @@ def run_one(idea, args, retriever=None):
 
 def write_benchmark(recs):
     ts = datetime.now().strftime("%Y%m%d-%H%M%S")
-    lines = ["# Benchmark", "", f"Run: {ts}  |  code model: {config.CODE_MODEL}  |  image: {recs[0]['models']['image'] if recs else ''}",
+    lines = ["# Benchmark", "", f"Run: {ts}  |  profile: {config.PROFILE} ({config.GPU_NAME or 'no NVIDIA GPU'})  |  code model: {config.CODE_MODEL}  |  image: {recs[0]['models']['image'] if recs else ''}",
              "", "| # | Idea | Result | Fix rounds | Total s | Plan s | Code s | Art s | Music s | Test+fix s | Game ends? |",
              "|---|------|--------|-----------:|--------:|-------:|-------:|------:|--------:|-----------:|:----------:|"]
     for i, r in enumerate(recs, 1):
@@ -164,7 +166,7 @@ def main():
     ap = argparse.ArgumentParser(description="Generate a playable 2D game from a plain-English idea (local open-source AI only).")
     ap.add_argument("idea", nargs="?", help="the game idea, in plain English")
     ap.add_argument("--batch", metavar="FILE", help="run every non-empty line of FILE as a separate idea and write a benchmark table")
-    ap.add_argument("--skip-art", action="store_true", help="use coloured placeholder sprites (no Forge needed)")
+    ap.add_argument("--skip-art", action="store_true", help="use coloured placeholder sprites (no image model needed)")
     ap.add_argument("--no-music", action="store_true", help="skip MusicGen (the game uses a built-in chiptune loop)")
     ap.add_argument("--music-seconds", type=int, default=config.MUSIC_SECONDS)
     ap.add_argument("--max-fixes", type=int, default=config.MAX_FIX_ROUNDS, help="max LLM repair rounds after a failed test")
@@ -195,7 +197,7 @@ def main():
             say(f"\n  ERROR: {e}")
             if "-v" in sys.argv:
                 traceback.print_exc()
-            recs.append({"idea": idea, "error": str(e)[:300], "models": {"image": config.FORGE_CHECKPOINT or "(Forge default)"}})
+            recs.append({"idea": idea, "error": str(e)[:300], "models": {"image": config.IMAGE_MODEL, "profile": config.PROFILE}})
     if args.batch:
         path = write_benchmark(recs)
         say(f"\nBenchmark table: {path}")

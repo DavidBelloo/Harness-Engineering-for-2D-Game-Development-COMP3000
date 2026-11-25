@@ -34,7 +34,7 @@ async def main():
     tmp = Path(tempfile.mkdtemp(prefix="harness_mcp_"))
     fstate = ms.State()
     fsrv, fport = ms.start(ms.make_handler_forge, fstate)
-    env = dict(os.environ, FORGE_URL=f"http://127.0.0.1:{fport}", OLLAMA_URL="http://127.0.0.1:9", PYTHONIOENCODING="utf-8")
+    env = dict(os.environ, HARNESS_IMAGE_BACKEND="forge", FORGE_URL=f"http://127.0.0.1:{fport}", OLLAMA_URL="http://127.0.0.1:9", PYTHONIOENCODING="utf-8")
     params = StdioServerParameters(command=sys.executable, args=[str(ROOT / "mcp_server.py")], env=env, cwd=str(ROOT))
     async with stdio_client(params) as (r, w):
         async with ClientSession(r, w) as s:

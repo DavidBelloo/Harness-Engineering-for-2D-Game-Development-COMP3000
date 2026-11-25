@@ -47,8 +47,12 @@ def main():
     fsrv, fport = ms.start(ms.make_handler_forge, fstate)
     config.OLLAMA_URL, config.FORGE_URL, config.OUTPUT_DIR = f"http://127.0.0.1:{oport}", f"http://127.0.0.1:{fport}", tmp
     config.CACHE_DIR = tmp / "cache"
+    config.IMAGE_BACKEND = "forge"        # the mock Forge server stands in for Stable Diffusion
 
     print("\n--- unit checks ---")
+    check("hardware profiles define every model", all(set(v) == set(config.PROFILES["high"]) for v in config.PROFILES.values()))
+    check("profile chosen from VRAM", config.PROFILE in config.PROFILES and
+          (config.PROFILE == "high") == (config.GPU_VRAM_MIB >= config.HIGH_VRAM_MIB or config.PROFILE == "high"))
     check("plan normaliser repairs junk", planner.normalise({"sprites": ["a b c", {"name": "x"}], "sfx": ["boom", "hit"]}, "idea")["sprites"][0]["name"] == "a_b_c")
     check("plan normaliser filters unknown sfx", "boom" not in planner.normalise({"sfx": ["boom"]}, "idea")["sfx"])
     check("extract_code: fenced + chatter", coder.extract_code("Sure\n```js\nconst game = {update(){},draw(){}};\n```\nbye").startswith("const game"))
