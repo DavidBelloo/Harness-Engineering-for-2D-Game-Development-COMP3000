@@ -1,0 +1,5 @@
+Get-ChildItem -Recurse | Unblock-File
+
+if still then check if it has locked down all scripts with
+
+Get-ExecutionPolicy -List
